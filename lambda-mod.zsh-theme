@@ -3,16 +3,23 @@
 local LAMBDA="%(?,%{$fg_bold[green]%}λ,%{$fg_bold[red]%}λ)"
 if [[ "$USER" == "root" ]]; then USERCOLOR="red"; else USERCOLOR="green"; fi
 
+# Get info on stashes
+function get_git_stash_info() {
+	if [ "$(git stash list 2>/dev/null)" != "" ]; then 
+		echo -n "%{$fg_bold[yellow]%}S%{$reset_color%}"
+	fi
+}
+
 # Git sometimes goes into a detached head state. git_prompt_info doesn't
 # return anything in this case. So wrap it in another function and check
 # for an empty string.
 function check_git_prompt_info() {
     if git rev-parse --git-dir > /dev/null 2>&1; then
         if [[ -z $(git_prompt_info 2> /dev/null) ]]; then
-            echo "%{$fg[blue]%}detached-head%{$reset_color%}) $(git_prompt_status)
+            echo "%{$fg[blue]%}detached-head%{$reset_color%})$(git_prompt_status)
 %{$fg[yellow]%}→ "
         else
-            echo "$(git_prompt_info 2> /dev/null) $(git_prompt_status)
+            echo "$(git_prompt_info 2> /dev/null) $(git_prompt_status) $(get_git_stash_info)
 %{$fg_bold[cyan]%}→ "
         fi
     else
@@ -27,6 +34,7 @@ function get_right_prompt() {
         echo -n "%{$reset_color%}"
     fi
 }
+#####
 
 PROMPT=$''$LAMBDA'\
  %{$fg_bold[$USERCOLOR]%}%n@%m\
